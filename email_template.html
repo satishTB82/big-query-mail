@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Template</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f7f7f7;
+        }
+        .header-section {
+           /* background-color: #f3e5f3; /* Light purple color */
+        background-color: #030e4d;
+            padding: 20px;
+            text-align: center;
+        }
+        .main-title {
+            font-size: 18px;
+            color: white;
+            margin: 0;
+        }
+        .second-title {
+            font-size: 24px;
+            color: white;
+            margin: 10px 0 20px 0;
+        }
+        .info-section {
+            padding: 20px;
+            text-align: left;
+        }
+        .info-section p {
+            font-size: 16px;
+            color: #333;
+            margin: 0;
+        }
+        .info-section p strong {
+            font-weight: bold;
+        }
+        .third-section {
+            padding: 20px;
+            text-align: left;
+        }
+        .third-section p {
+            font-size: 16px;
+            color: #333;
+            margin: 10px 0;
+        }
+        .table-section {
+            padding: 10px 20px; /* Reduced padding */
+            background-color: #ffffff;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px; /* Reduced font size */
+            margin-top: 10px; /* Reduced margin to bring table closer to the above text */
+        }
+        .table-section table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .table-section th, .table-section td {
+            padding: 8px; /* Reduced padding for cells */
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        .table-section th {
+            border-bottom: 2px solid #ddd;
+        }
+        .view-button {
+            text-align: right;
+            font-size: 16px;
+            color: #007bff;
+            text-decoration: none;
+            border: 1px solid #007bff;
+            padding: 5px 10px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+        .view-button:hover {
+            background-color: #007bff;
+            color: white;
+        }
+        .recommendations-section h3 {
+            margin: 0;
+            font-size: 16px;
+            color: #333;
+        }
+        .amount {
+            font-weight: bold;
+            color: green;
+        }
+        .amount a {
+            color: #007bff;
+            text-decoration: none;
+            margin-left: 5px;
+            font-size: 14px;
+        }
+        .amount a:hover {
+            text-decoration: underline;
+        }
+        .label {
+            font-size: 12px;
+            color: #555;
+            font-style: italic;
+        }
+        .disclaimer-section {
+            padding: 20px;
+            font-size: 12px;
+            color: #777;
+            background-color: #f7f7f7;
+            border-top: 1px solid #ddd;
+            margin-top: 20px;
+        }
+        .disclaimer-section a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        .disclaimer-section a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Section -->
+    <div class="header-section">
+        <h1 class="main-title">API Insights</h1>
+        <h2 class="second-title">API Portfolio Monthly Summary - {{ month }}</h2>
+    </div>
+
+    <!-- Information Section -->
+    <div class="info-section">
+        <p>Service Owner: {{ service_owner }}</p>
+    </div>
+
+    <!-- Third Section -->
+    <div class="third-section">
+        <p>Please review your API portfolio and leverage insights to enhance performance, security and compliance.</p>
+    </div>
+
+    <!-- Fourth Section -->
+    <div class="table-section">
+        <table>
+            <tr>
+                <th colspan="4">Summary</th>
+                <th colspan="1"><a href="#" class="view-button" style="text-align: right; font-size: 14px; background-color: #007bff;color: #ffffff; text-decoration: none; padding: 5px 10px; border-radius: 4px;float: inline-end;">Detailed View ></a></th>
+            </tr>
+            <tr>
+                <td colspan="5"></td> <!-- Empty row for spacing -->
+            </tr>
+            <tr>
+                <td>
+                    <strong># of APIs owned</strong>
+                    <p style="font-size: 24px;font-weight: 700;">{{ no_of_apis }}</p>
+                </td>
+                <td colspan="2">
+                    <strong>Monthly Transaction Volume (Aggregate)</strong>
+                    <p style="font-size: 24px;font-weight: 700;">{{ monthly_transaction_volume }}</p>
+                </td>
+                <td>
+                    <strong># of Consuming Apps</strong>
+                    <p style="font-size: 24px;font-weight: 700;">{{ no_of_consuming_apps }}</p>
+                </td>
+                <td>
+                    <strong># of Non-Compliant Gateways Used</strong>
+                    <p style="font-size: 24px;font-weight: 700;">{{ no_of_noncompliant_gateways }}</p>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="5">
+                    <strong>API Level Recommendations</strong>
+                </td>
+            </tr>
+            <tr style="background-color:#f0ebeb;font-size: 12px;font-weight: 600;color: #777;font-style: italic;">
+                <td colspan="4">Low/No Activity API - Consider Decommission</td>
+                <td colspan="1"># of Transactions</td>
+            </tr>
+            {% for recommendation in recommendations %}
+                <tr>
+                    <td colspan="4">{{ recommendation[0] }}</td>
+                    <td colspan="1">{{ recommendation[0] }}</td>
+                </tr>
+            {% endfor %}
+            <tr>
+                <td colspan="2">API Performance Needs Improvement</td>
+                <td>Alert</td>
+                <td>API ASK ID</td>
+                <td>Latency</td>
+            </tr>
+            {% for recommendation in recommendations %}
+                <tr style="background-color:#f0ebeb;font-size: 12px;font-weight: 600;color: #777;font-style: italic;">
+                    <td colspan="2">API Performance Needs Improvement</td>
+                    <td>Alert</td>
+                    <td>API ASK ID</td>
+                    <td>Latency</td>
+                </tr>
+            {% endfor %}
+            <tr style="background-color:#f0ebeb;font-size: 12px;font-weight: 600;color: #777;font-style: italic;">
+                <td colspan="3">Migrate APIs to ESI Approved Gateway</td>
+                <td colspan="1">API ASK ID</td>
+                <td colspan="1">Non-compliant Gateway</td>
+            </tr>
+            {% for recommendation in recommendations %}
+                <tr>
+                    <td colspan="3">Migrate APIs to ESI Approved Gateway</td>
+                    <td colspan="1">API ASK ID</td>
+                    <td colspan="1">Non-compliant Gateway</td>
+                </tr>
+            {% endfor %}
+            <tr>
+                <td colspan="5">
+                    <strong>Consumer Specific Anomalies</strong>
+                </td>
+            </tr>
+            <tr style="background-color:#f0ebeb;font-size: 12px;font-weight: 600;color: #777;font-style: italic;">
+                <td colspan="1">Consumer</td>
+                <td colspan="1">Consuming API</td>
+                <td colspan="1">Alert</td>
+                <td colspan="1">Consumer ASK ID</td>
+                <td colspan="1">Transaction Volume</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Disclaimer Section -->
+    <div class="disclaimer-section" style="margin-top: 5%;">
+        <p>You are receiving this email because you are an AIDE Owner (Technical/Business/SLO) or Delegate for {{ askId }}. If you do not want to receive this mail, or are no longer associated with this application, please unsubscribe yourself by replying back to this e-mail.
+        <p>Please ask any questions about in this e-mail ID: <a href="mailto:APIInsights@ds.uhc.com" target="_blank"><u>APIInsights@ds.uhc.com</u></a> .</p>
+    </div>
+
+</body>
+</html>
