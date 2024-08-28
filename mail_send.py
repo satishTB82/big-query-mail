@@ -7,7 +7,7 @@ from jinja2 import Environment, FileSystemLoader
 smtp_server = 'smtp.gmail.com'
 smtp_port = 587
 smtp_user = 'satish.prajapati@tecblic.com'
-smtp_password = 'lxkb iwju qvpy vhmd'
+smtp_password = ''
 
 def send_email(to_email, subject, html_body):
     # Create the email message
