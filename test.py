@@ -1,42 +1,85 @@
-import smtplib
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
+from azure.identity import DefaultAzureCredential
+from azure.mgmt.apimanagement import ApiManagementClient
+from azure.monitor.query import MetricsQueryClient
+from azure.core.exceptions import HttpResponseError
+from datetime import datetime, timedelta
 
-# Replace these with your actual details
-smtp_server = "smtp.office365.com"
-smtp_port = 587
-username = "your_email@example.com"
-password = "your_password"
+def get_apim_details(subscription_id, resource_group_name, apim_name):
+    # Authenticate using DefaultAzureCredential
+    credential = DefaultAzureCredential()
+    
+    # Create an ApiManagementClient instance
+    apim_client = ApiManagementClient(credential, subscription_id)
+    
+    # List APIs in the API Management service
+    apis = apim_client.api.list_by_service(resource_group_name, apim_name)
+    
+    # Extract API details
+    api_details_list = []
+    for api in apis:
+        api_details_list.append({
+            'SubscriptionID': subscription_id,
+            'APIMName': apim_name,
+            'APIID': api.id,
+            'Name': api.name,
+            'CallCountSuccess': 'N/A',  # Placeholder for metrics data
+            'CallCountTotal': 'N/A'     # Placeholder for metrics data
+        })
+    
+    return api_details_list
 
-def send_email():
-    # Create the email message
-    msg = MIMEMultipart()
-    msg['From'] = username
-    msg['To'] = "recipient@example.com"  # Replace with the recipient's email address
-    msg['Subject'] = "HTML Email Test"
-
-    # Define the HTML content
-    html_content = """
-    <html>
-    <body>
-        <h1 style="color:blue;">Hello from Python</h1>
-        <p>This is a test email sent using SMTP with password authentication.</p>
-        <p><b>Enjoy coding!</b></p>
-    </body>
-    </html>
-    """
-    msg.attach(MIMEText(html_content, 'html'))
-
-    # Connect to the SMTP server
+def get_api_metrics(subscription_id, resource_group_name, apim_name, api_id):
+    # Authenticate using DefaultAzureCredential
+    credential = DefaultAzureCredential()
+    
+    # Create a MetricsQueryClient instance
+    metrics_client = MetricsQueryClient(credential)
+    
+    # Define the time range for the metrics query (e.g., last 24 hours)
+    end_time = datetime.utcnow()
+    start_time = end_time - timedelta(days=1)
+    
+    # Define the API endpoint for metrics
+    resource_id = f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.ApiManagement/service/{apim_name}/apis/{api_id}"
+    
+    # Query the metrics
     try:
-        server = smtplib.SMTP(smtp_server, smtp_port)
-        server.starttls()  # Upgrade the connection to a secure encrypted SSL/TLS connection
-        server.login(username, password)
-        server.sendmail(msg['From'], msg['To'], msg.as_string())
-        server.quit()
-        print("Email sent successfully")
-    except Exception as e:
-        print(f"Failed to send email: {e}")
+        response = metrics_client.query_resource(
+            resource_id=resource_id,
+            metric_names=["TotalRequests", "SuccessfulRequests"],  # Use appropriate metrics
+            timespan=f"{start_time.isoformat()}/{end_time.isoformat()}"
+        )
+        metrics = response.metrics
 
-if __name__ == "__main__":
-    send_email()
+        # Extract call counts
+        for metric in metrics:
+            if metric.name == "TotalRequests":
+                total_requests = metric.timeseries[0].data[-1].total
+            if metric.name == "SuccessfulRequests":
+                successful_requests = metric.timeseries[0].data[-1].total
+        
+        return {
+            'CallCountSuccess': successful_requests,
+            'CallCountTotal': total_requests
+        }
+    
+    except HttpResponseError as e:
+        print(f"Error fetching metrics: {e}")
+        return {
+            'CallCountSuccess': 'Error',
+            'CallCountTotal': 'Error'
+        }
+
+# Replace with your subscription ID, resource group name, and APIM service name
+subscription_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+resource_group_name = "your-resource-group"
+apim_name = "your-apim-service"
+
+# Get API details
+api_details = get_apim_details(subscription_id, resource_group_name, apim_name)
+print("API Details:")
+for details in api_details:
+    # Fetch metrics for each API
+    metrics = get_api_metrics(subscription_id, resource_group_name, apim_name, details['APIID'])
+    details.update(metrics)
+    print(f"SubscriptionID: {details['SubscriptionID']}, APIMName: {details['APIMName']}, APIID: {details['APIID']}, Name: {details['Name']}, CallCountSuccess: {details['CallCountSuccess']}, CallCountTotal: {details['CallCountTotal']}")
